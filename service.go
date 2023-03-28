@@ -8,7 +8,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-var transact *TransactionLogger
+var transact TransactionLogger
 
 func main() {
 	err := initializeTransactionLog()
@@ -33,7 +33,12 @@ func main() {
 func initializeTransactionLog() error {
 	var err error
 
-	transact, err = NewTransactionLogger("/tmp/transactions.log")
+	transact, err = NewPostgresTransactionLogger(PostgresDBParams{
+		host:     "localhost",
+		dbName:   "kvs",
+		user:     "test",
+		password: "pa55word",
+	})
 	if err != nil {
 		return fmt.Errorf("failed to create transaction logger: %w", err)
 	}

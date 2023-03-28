@@ -17,7 +17,7 @@ func TestCreateLogger(t *testing.T) {
 	const filename = "/tmp/create-logger.txt"
 	defer os.Remove(filename)
 
-	tl, err := NewTransactionLogger(filename)
+	tl, err := NewFileTransactionLogger(filename)
 
 	if tl == nil {
 		t.Error("Logger is nil?")
@@ -36,7 +36,7 @@ func TestWriteAppend(t *testing.T) {
 	const filename = "/tmp/write-append.txt"
 	defer os.Remove(filename)
 
-	tl, err := NewTransactionLogger(filename)
+	tl, err := NewFileTransactionLogger(filename)
 	if err != nil {
 		t.Error(err)
 	}
@@ -56,7 +56,7 @@ func TestWriteAppend(t *testing.T) {
 	tl.WritePut("my-key", "my-value2")
 	tl.Wait()
 
-	tl2, err := NewTransactionLogger(filename)
+	tl2, err := NewFileTransactionLogger(filename)
 	if err != nil {
 		t.Error(err)
 	}
@@ -76,8 +76,8 @@ func TestWriteAppend(t *testing.T) {
 	tl2.WritePut("my-key2", "my-value4")
 	tl2.Wait()
 
-	if tl2.lastSequence != 4 {
-		t.Errorf("Last sequence mismatch (expected 4; got %d)", tl2.lastSequence)
+	if tl2.LastSequence() != 4 {
+		t.Errorf("Last sequence mismatch (expected 4; got %d)", tl2.LastSequence())
 	}
 }
 
@@ -85,7 +85,7 @@ func TestWritePut(t *testing.T) {
 	const filename = "/tmp/write-put.txt"
 	defer os.Remove(filename)
 
-	tl, _ := NewTransactionLogger(filename)
+	tl, _ := NewFileTransactionLogger(filename)
 	tl.Run()
 	defer tl.Close()
 
@@ -95,7 +95,7 @@ func TestWritePut(t *testing.T) {
 	tl.WritePut("my-key", "my-value4")
 	tl.Wait()
 
-	tl2, _ := NewTransactionLogger(filename)
+	tl2, _ := NewFileTransactionLogger(filename)
 	evin, errin := tl2.ReadEvents()
 	defer tl2.Close()
 
@@ -108,7 +108,7 @@ func TestWritePut(t *testing.T) {
 		t.Error(err)
 	}
 
-	if tl.lastSequence != tl2.lastSequence {
-		t.Errorf("Last sequence mismatch (%d vs %d)", tl.lastSequence, tl2.lastSequence)
+	if tl.LastSequence() != tl2.LastSequence() {
+		t.Errorf("Last sequence mismatch (%d vs %d)", tl.LastSequence(), tl2.LastSequence())
 	}
 }
